@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full-Body Warm-Up Routine</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--text:#1d2a24;--muted:#5d6b64;--accent:#1f8a5b;--border:#e1e5df}
+@media (prefers-color-scheme:dark){:root{--bg:#121714;--card:#1b231f;--text:#eaf1ec;--accent:#4fd18f;--border:#2a352f;--muted:#9bada3}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5}
+header{padding:40px 20px 24px;text-align:center}
+h1{margin:0 0 6px;font-size:clamp(1.8rem,5vw,2.6rem)}
+header p{margin:0;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 16px 20px}
+.filters button{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 16px;border-radius:999px;font-size:.9rem;cursor:pointer}
+.filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.grid{max-width:1100px;margin:0 auto;padding:0 16px 48px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.img{aspect-ratio:1/1;background:#fff;display:flex;align-items:center;justify-content:center;position:relative}
+.img img{width:100%;height:100%;object-fit:contain}
+.img .fb{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#888;font-size:.85rem;text-align:center;padding:12px}
+.body{padding:12px 14px 14px}
+.num{color:var(--accent);font-weight:700;font-size:.8rem}
+.body h3{margin:2px 0 6px;font-size:1.05rem}
+.tag{display:inline-block;font-size:.75rem;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:1px 10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Full-Body Warm-Up Routine</h1>
+  <p>20 moves from shoulders to ankles. Go in order, or filter by body area.</p>
+</header>
+<div class="filters" id="filters"></div>
+<main class="grid" id="grid"></main>
+
+<script>
+const cats=["All","Upper body","Core","Lower body","Cardio"];
+const ex=[
+["Crossover Stretch","Upper body","https://i.pinimg.com/1200x/2f/aa/48/2faa48a211ea5208dce1b8518db9fc01.jpg"],
+["Triceps Stretch","Upper body","https://i.pinimg.com/1200x/b2/78/b3/b278b336934d84dcec8e694c19280e41.jpg"],
+["Arm Circles","Upper body","https://i.pinimg.com/736x/0f/75/e0/0f75e091296d2b4418681d41eee37adf.jpg"],
+["Shoulder Rolls","Upper body","https://i.pinimg.com/1200x/a1/f3/a6/a1f3a6d730a65381bf0852a0a6dd6c34.jpg"],
+["Standing Shoulder Rolls, Arms Wide","Upper body","https://cdn.shopify.com/s/files/1/1585/6091/files/Shoulder_Socket_Rotations_480x480.png?v=1667859155"],
+["Wrist Rotations","Upper body","https://i.pinimg.com/736x/ed/fd/04/edfd048c11467b94aca1cf979e2c517e.jpg"],
+["Elbow Rotation","Upper body","https://d5sbbf6usl3xq.cloudfront.net/elbow_rotation__kehuni_chakra.png"],
+["Torso Twists","Core","https://images.squarespace-cdn.com/content/v1/5ebef943272c1041d83b1d15/1613608895274-U4FPVVVI87WSFZGOG3QZ/Torso+Twist.jpg"],
+["Torso Twists (variation)","Core","https://images.openai.com/static-rsc-4/3QkubdnwT0qOUEsa_3y42lDcgTJHCbXeV60_Z_fCiQTGIiWkMKcBAZ_YQ0agAVNAt9WDpPfHx6TgJsSmj-TL0bA4VaHtxtwlN7CSb1_G87rd1gn_IitLoEa0Zkk554xRMG0TtVufWVsdoiqHUl50dYWDedVlX5jnmSsMzi04G667GmBynY4jYF3QFAM1dmjb?purpose=fullsize"],
+["Bodyweight Squats","Lower body","https://i.pinimg.com/1200x/64/1b/8f/641b8f664fdaab081d7863c2e7b5ff5b.jpg"],
+["Ankle Rotations","Lower body","https://i.pinimg.com/736x/0c/cc/a6/0ccca6e574e24170238094106e19932d.jpg"],
+["Standing Knee Hug","Lower body","https://i.pinimg.com/1200x/df/ec/2b/dfec2b9b6c214408df1056a6d186a846.jpg"],
+["Standing Hip Rotations Flow","Lower body","https://i.pinimg.com/736x/3b/9e/d6/3b9ed6dd678ddb8184a1e9c5c84a66a3.jpg"],
+["Standing Quadriceps Stretch","Lower body","https://i.pinimg.com/736x/00/1f/fc/001ffc9ac21de8af4407760a34028136.jpg"],
+["Standing Alternate Toe Touches","Core","https://i.pinimg.com/1200x/5f/c6/5f/5fc65f4865e6a3b3b0675149f93b92aa.jpg"],
+["High Knee Runs","Cardio","https://i.pinimg.com/1200x/ee/a0/1b/eea01b4ffb39bfa25ef9bc991063f836.jpg"],
+["Jumping Jacks","Cardio","https://i.pinimg.com/736x/6f/4b/3a/6f4b3ab1697b2cd2c0ef012f5fcbcfde.jpg"],
+["Side Lunge","Lower body","https://i.pinimg.com/736x/a2/ea/29/a2ea29675241cd872e95cead5a36bcf6.jpg"],
+["Cross-Body Toe Touch","Core","https://i.pinimg.com/1200x/5f/c6/5f/5fc65f4865e6a3b3b0675149f93b92aa.jpg"],
+["Toe Touch","Core","https://i.pinimg.com/1200x/d7/b0/1f/d7b01f6eec3665f04269025d54fa635c.jpg"]
+];
+let cur="All";
+const f=document.getElementById("filters"),g=document.getElementById("grid");
+function render(){
+  f.innerHTML="";
+  cats.forEach(c=>{const b=document.createElement("button");b.textContent=c;if(c===cur)b.className="on";b.onclick=()=>{cur=c;render()};f.appendChild(b)});
+  g.innerHTML="";
+  ex.forEach((e,i)=>{
+    if(cur!=="All"&&e[1]!==cur)return;
+    const d=document.createElement("article");d.className="card";
+    d.innerHTML=`<div class="img"><img loading="lazy" referrerpolicy="no-referrer" alt="${e[0]}" src="${e[2]}"><div class="fb">Image unavailable</div></div>
+    <div class="body"><div class="num">${String(i+1).padStart(2,"0")}</div><h3>${e[0]}</h3><span class="tag">${e[1]}</span></div>`;
+    const img=d.querySelector("img");
+    img.onerror=()=>{img.style.display="none";d.querySelector(".fb").style.display="flex"};
+    g.appendChild(d);
+  });
+}
+render();
+</script>
+</body>
+</html>
